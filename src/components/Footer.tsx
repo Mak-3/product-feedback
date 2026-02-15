@@ -52,7 +52,7 @@ export default function Footer() {
                   </Link>
                 </li>
                 <li>
-                  <Link href="#" className="hover:text-foreground transition-colors">
+                  <Link href="/docs" className="hover:text-foreground transition-colors">
                     Documentation
                   </Link>
                 </li>
@@ -68,12 +68,12 @@ export default function Footer() {
               <h4 className="text-[13px] font-medium mb-4">Legal</h4>
               <ul className="space-y-2.5 text-[13px] text-muted">
                 <li>
-                  <Link href="#" className="hover:text-foreground transition-colors">
+                  <Link href="/privacy" className="hover:text-foreground transition-colors">
                     Privacy
                   </Link>
                 </li>
                 <li>
-                  <Link href="#" className="hover:text-foreground transition-colors">
+                  <Link href="/terms" className="hover:text-foreground transition-colors">
                     Terms
                   </Link>
                 </li>

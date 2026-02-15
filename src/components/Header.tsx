@@ -44,7 +44,7 @@ export default function Header() {
             Pricing
           </Link>
           <Link
-            href="#"
+            href="/docs"
             className="text-muted hover:text-foreground transition-colors text-[13px]"
           >
             Docs
@@ -53,13 +53,13 @@ export default function Header() {
 
         <div className="flex items-center gap-4">
           <Link
-            href="#"
+            href="/login"
             className="text-[13px] text-muted hover:text-foreground transition-colors hidden sm:block"
           >
             Log in
           </Link>
           <Link
-            href="#"
+            href="/register"
             className="text-[13px] bg-foreground text-background px-4 py-2 rounded-md hover:opacity-80 transition-opacity"
           >
             Get started

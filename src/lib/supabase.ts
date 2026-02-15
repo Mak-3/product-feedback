@@ -1,11 +1,11 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const supabasePublishablekey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
 // Check if Supabase is configured
 export const isSupabaseConfigured = (): boolean => {
-  return !!(supabaseUrl && supabaseAnonKey);
+  return !!(supabaseUrl && supabasePublishablekey);
 };
 
 // Get configuration error message
@@ -42,7 +42,7 @@ const createSupabaseClient = (): SupabaseClient => {
     );
   }
 
-  return createClient(supabaseUrl!, supabaseAnonKey!, {
+  return createClient(supabaseUrl!, supabasePublishablekey!, {
     auth: {
       autoRefreshToken: true,
       persistSession: true,

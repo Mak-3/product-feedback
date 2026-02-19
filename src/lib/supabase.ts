@@ -1,11 +1,11 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabasePublishablekey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+const supabasePublishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
 // Check if Supabase is configured
 export const isSupabaseConfigured = (): boolean => {
-  return !!(supabaseUrl && supabasePublishablekey);
+  return !!(supabaseUrl && supabasePublishableKey);
 };
 
 // Get configuration error message
@@ -16,7 +16,7 @@ export const getConfigError = (): string | null => {
     'Missing Supabase environment variables!\n\n' +
     'Please create a .env.local file in the root directory with:\n' +
     'NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url\n' +
-    'NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key\n\n' +
+    'NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your_supabase_anon_key\n\n' +
     'You can find these values in your Supabase project settings: https://app.supabase.com'
   );
 };
@@ -42,7 +42,7 @@ const createSupabaseClient = (): SupabaseClient => {
     );
   }
 
-  return createClient(supabaseUrl!, supabasePublishablekey!, {
+  return createClient(supabaseUrl!, supabasePublishableKey!, {
     auth: {
       autoRefreshToken: true,
       persistSession: true,

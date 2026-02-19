@@ -43,11 +43,17 @@ export default function RegisterPage() {
       if (signUpError) throw signUpError;
 
       if (data.user) {
-        router.push("/");
-        router.refresh();
+        router.push(`/confirm-email?email=${encodeURIComponent(email)}`);
       }
     } catch (err: any) {
-      setError(err.message || "Failed to create account");
+      if (err.message?.includes("already registered") || 
+          err.message?.includes("User already registered") ||
+          err.message?.includes("already exists") ||
+          err.code === "23505") {
+        setError("User already exists. Please login instead.");
+      } else {
+        setError(err.message || "Failed to create account");
+      }
     } finally {
       setLoading(false);
     }

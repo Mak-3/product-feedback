@@ -39,7 +39,18 @@ function LoginPageContent() {
         router.refresh();
       }
     } catch (err: any) {
-      setError(err.message || "Failed to sign in");
+      if (err.message?.includes("Invalid login credentials") || 
+          err.message?.includes("Invalid credentials") ||
+          err.message?.includes("Email not confirmed") ||
+          err.code === "invalid_credentials") {
+        if (err.message?.includes("Email not confirmed")) {
+          setError("Please confirm your email address. Check your inbox for the confirmation link.");
+        } else {
+          setError("User doesn't exist. Please create an account first.");
+        }
+      } else {
+        setError(err.message || "Failed to sign in");
+      }
     } finally {
       setLoading(false);
     }

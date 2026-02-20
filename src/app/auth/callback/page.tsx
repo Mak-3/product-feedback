@@ -14,7 +14,7 @@ function AuthCallbackContent() {
       
       if (code) {
         try {
-          const { error } = await supabase.auth.exchangeCodeForSession(code);
+          const { data, error } = await supabase.auth.exchangeCodeForSession(code);
           
           if (error) {
             console.error("Error exchanging code for session:", error);
@@ -22,8 +22,13 @@ function AuthCallbackContent() {
             return;
           }
 
-          // Successfully authenticated, redirect to home
-          router.push("/");
+          if (data.user && !data.user.email_confirmed_at) {
+            await supabase.auth.signOut();
+            router.push(`/confirm-email?email=${encodeURIComponent(data.user.email || "")}`);
+            return;
+          }
+
+          router.push("/dashboard");
           router.refresh();
         } catch (err) {
           console.error("Auth callback error:", err);

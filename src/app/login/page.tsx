@@ -35,7 +35,12 @@ function LoginPageContent() {
       if (signInError) throw signInError;
 
       if (data.user) {
-        router.push("/");
+        if (!data.user.email_confirmed_at) {
+          await supabase.auth.signOut();
+          router.push(`/confirm-email?email=${encodeURIComponent(email)}`);
+          return;
+        }
+        router.push("/dashboard");
         router.refresh();
       }
     } catch (err: any) {

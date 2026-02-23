@@ -40,17 +40,71 @@ export default function RegisterPage() {
         },
       });
 
-      if (signUpError) throw signUpError;
+      if (signUpError) {
+        // Check for specific Supabase error codes indicating user already exists
+        const errorMessage = signUpError.message?.toLowerCase() || '';
+        if (errorMessage.includes("already registered") || 
+            errorMessage.includes("user already registered") ||
+            errorMessage.includes("already exists") ||
+            errorMessage.includes("email address is already registered") ||
+            signUpError.status === 422) {
+          setError("An account with this email already exists. Please login instead.");
+          setLoading(false);
+          return;
+        }
+        throw signUpError;
+      }
 
+      // Check if user already exists (email already confirmed)
       if (data.user) {
-        router.push(`/confirm-email?email=${encodeURIComponent(email)}`);
+        // If the user's email is already confirmed, it means the account already exists
+        if (data.user.email_confirmed_at) {
+          setError("An account with this email already exists. Please login instead.");
+          setLoading(false);
+          return;
+        }
+
+        // Try to sign in to check if account exists with this password
+        // This helps catch cases where Supabase doesn't throw an error
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+
+        // If sign in succeeds, user already exists and is confirmed
+        if (!signInError) {
+          setError("An account with this email already exists. Please login instead.");
+          await supabase.auth.signOut(); // Sign out the auto-login
+          setLoading(false);
+          return;
+        }
+
+        // If sign in fails, check if it's because of wrong password (user exists) 
+        // or because account doesn't exist
+        if (signInError.message?.includes("Invalid login credentials") || 
+            signInError.message?.includes("Invalid credentials")) {
+          // User exists but password might be wrong, or it's a new account
+          // Since we're in registration, proceed with email confirmation
+          // The user will need to confirm their email
+          router.push(`/confirm-email?email=${encodeURIComponent(email)}`);
+        } else {
+          // Some other error, proceed with confirmation
+          router.push(`/confirm-email?email=${encodeURIComponent(email)}`);
+        }
+      } else {
+        // No user returned, show error
+        setError("Failed to create account. Please try again.");
       }
     } catch (err: any) {
-      if (err.message?.includes("already registered") || 
-          err.message?.includes("User already registered") ||
-          err.message?.includes("already exists") ||
-          err.code === "23505") {
-        setError("User already exists. Please login instead.");
+      // Handle various error cases
+      const errorMessage = err.message?.toLowerCase() || '';
+      if (errorMessage.includes("already registered") || 
+          errorMessage.includes("user already registered") ||
+          errorMessage.includes("already exists") ||
+          errorMessage.includes("email address is already registered") ||
+          err.code === "23505" ||
+          err.status === 422) {
+        setError("An account with this email already exists. Please login instead.");
       } else {
         setError(err.message || "Failed to create account");
       }

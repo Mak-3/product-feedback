@@ -1,9 +1,44 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { supabase } from "@/lib/supabase";
+import { useRouter } from "next/navigation";
 
 export default function Header() {
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
+
+  useEffect(() => {
+    const checkUser = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        setUser(user);
+      } catch (err) {
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkUser();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+    router.push("/");
+    router.refresh();
+  };
   return (
     <motion.header
       initial={{ opacity: 0 }}
@@ -52,18 +87,39 @@ export default function Header() {
         </div>
 
         <div className="flex items-center gap-4">
-          <Link
-            href="/login"
-            className="text-[13px] text-muted hover:text-foreground transition-colors hidden sm:block"
-          >
-            Log in
-          </Link>
-          <Link
-            href="/register"
-            className="text-[13px] bg-foreground text-background px-4 py-2 rounded-md hover:opacity-80 transition-opacity"
-          >
-            Get started
-          </Link>
+          {loading ? (
+            <div className="w-4 h-4 border-2 border-muted border-t-transparent rounded-full animate-spin"></div>
+          ) : user && user.email_confirmed_at ? (
+            <>
+              <Link
+                href="/dashboard"
+                className="text-[13px] text-muted hover:text-foreground transition-colors hidden sm:block"
+              >
+                Dashboard
+              </Link>
+              <button
+                onClick={handleLogout}
+                className="text-[13px] bg-foreground text-background px-4 py-2 rounded-md hover:opacity-80 transition-opacity"
+              >
+                Log out
+              </button>
+            </>
+          ) : (
+            <>
+              <Link
+                href="/login"
+                className="text-[13px] text-muted hover:text-foreground transition-colors hidden sm:block"
+              >
+                Log in
+              </Link>
+              <Link
+                href="/register"
+                className="text-[13px] bg-foreground text-background px-4 py-2 rounded-md hover:opacity-80 transition-opacity"
+              >
+                Get started
+              </Link>
+            </>
+          )}
         </div>
       </nav>
     </motion.header>

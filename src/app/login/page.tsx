@@ -9,6 +9,7 @@ import { supabase } from "@/lib/supabase";
 function LoginPageContent() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
@@ -18,6 +19,12 @@ function LoginPageContent() {
     const errorParam = searchParams.get("error");
     if (errorParam === "auth_failed") {
       setError("Authentication failed. Please try again.");
+    }
+
+    // Restore "Remember me" preference from localStorage
+    const savedRememberMe = localStorage.getItem('rememberMe');
+    if (savedRememberMe === 'true') {
+      setRememberMe(true);
     }
   }, [searchParams]);
 
@@ -40,6 +47,18 @@ function LoginPageContent() {
           router.push(`/confirm-email?email=${encodeURIComponent(email)}`);
           return;
         }
+
+        // Store "Remember me" preference
+        if (rememberMe) {
+          // Session will persist in localStorage (default Supabase behavior)
+          localStorage.setItem('rememberMe', 'true');
+        } else {
+          // Store preference to clear session on browser close
+          localStorage.setItem('rememberMe', 'false');
+          // Note: Supabase persists sessions by default, but we can clear on next visit
+          // if user didn't check "Remember me"
+        }
+
         router.push("/dashboard");
         router.refresh();
       }
@@ -177,6 +196,8 @@ function LoginPageContent() {
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
                   className="w-4 h-4 rounded border-border text-accent focus:ring-accent"
                 />
                 <span className="text-muted">Remember me</span>
